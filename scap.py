@@ -1,5 +1,6 @@
 import asyncio
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, BrowserConfig
+from file_downloader import is_downloadable_file, check_content_type
 
 # Configuration
 WEBSITE_URL = "https://news.ycombinator.com"
@@ -10,6 +11,15 @@ SCROLL_TIMEOUT = 30000
 SCROLL_DELAY = 2.0
 WAIT_FOR_ELEMENT = "css:body"
 
+async def check_if_downloadable(url: str) -> bool:
+    """Check if URL points to a downloadable file."""
+    # First check by extension
+    if is_downloadable_file(url):
+        return True
+    
+    # Then check by content type
+    is_downloadable, _ = await check_content_type(url)
+    return is_downloadable
 async def navigate_to_page(url: str, session_id: str = SESSION_ID):
     """Navigate to a webpage and return crawler + result."""
     browser_cfg = BrowserConfig(browser_mode="playwright", headless=HEADLESS_MODE)

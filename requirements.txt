@@ -1,3 +1,5 @@
 crawl4ai
 playwright
-psutil 
+psutil
+boto3
+aiohttp 
