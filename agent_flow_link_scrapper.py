@@ -174,8 +174,7 @@ if __name__ == "__main__":
     
     # Example URLs
     test_urls = [
-        "https://news.ycombinator.com",
-        "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+        "https://www.mckinsey.com/featured-insights/insights-store",
     ]
     
     # Method 1: Using class
