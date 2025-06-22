@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <style>
+        body {
+            font-family: "Arial";
+        }
+    </style>
+    <script type="text/javascript">
+    window.awsWafCookieDomainList = ['scispace.com','debug-prod.scispace.com','debug-prod-2.scispace.com','debug-prod-3.scispace.com','debug-prod-4.scispace.com','debug-prod-5.scispace.com','debug-prod-6.scispace.com','debug-prod-7.scispace.com','debug-prod-8.scispace.com'];
+    window.gokuProps = {
+"key":"AQIDAHjcYu/GjX+QlghicBgQ/7bFaQZ+m5FKCMDnO+vTbNg96AFpPqiPE5KMH2NZjHUIcbxIAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMUJzR5zwwWFRvNeh/AgEQgDs5pGVhUZBOmydXOWzFqCQABmE8rqdTwSp+lf2fqU8VDev+4PFPsKyP3lQdqgLAZ/m3MRoOEFav6L/1UQ==",
+          "iv":"A6wADQEjUwAABpOD",
+          "context":"FNLq0IFcIwB2kcCZ1mUqaeAW4JOYA9NjP4Q55gjshPnrBysHlbgypJojwsIhr1UJR3ec1tsCtjZv4wpgkhmmoBHPcJ9lRQq1ftRM5ItzTw5mQtIe45XQgebiopfPrwAHLdXDI6WDIivIuSR1xErXm5mLyDdmLRLwK6864TrH8ZEinzl2L0XZSBSWUU0JlY14Nxx9xNFtilx+4RAF7+jHeNiXWYE7xefhQ5nnQ9cHEvwR/2qTEyxXh4rpMwLkXWg0qEC1KRzqYf4IW40dv91gR6o40SOPi+0u5iu9KpL8WxXoGTqzHVaistwkoQPD5K3EcTcc01p49fdjz5E/REL4zBdxIGjzR6eQwelqzqCZ1Q=="
+};
+    </script>
+    <script src="https://c67d66c175ac.7a103bec.us-east-2.token.awswaf.com/c67d66c175ac/2c76fa3b092f/1568e5b47fde/challenge.js"></script>
+</head>
+<body>
+    <div id="challenge-container"></div>
+    <script type="text/javascript">
+        AwsWafIntegration.saveReferrer();
+        AwsWafIntegration.checkForceRefresh().then((forceRefresh) => {
+            if (forceRefresh) {
+                AwsWafIntegration.forceRefreshToken().then(() => {
+                    window.location.reload(true);
+                });
+            } else {
+                AwsWafIntegration.getToken().then(() => {
+                    window.location.reload(true);
+                });
+            }
+        });
+    </script>
+    <noscript>
+        <h1>JavaScript is disabled</h1>
+        In order to continue, we need to verify that you're not a robot.
+        This requires JavaScript. Enable JavaScript and then reload the page.
+    </noscript>
+</body>
+</html>

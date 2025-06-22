@@ -5,8 +5,9 @@ from urllib.parse import urlparse
 from pathlib import Path
 
 # S3 Configuration (set these as environment variables or replace with your values)
-S3_BUCKET_NAME = "your-bucket-name"
-S3_REGION = "us-east-1"
+import os
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "myscapper-downloads")
+S3_REGION = os.getenv("S3_REGION", "us-east-1")
 
 # File extensions that should be downloaded instead of scraped
 DOWNLOADABLE_EXTENSIONS = {
@@ -27,7 +28,24 @@ def is_downloadable_file(url: str) -> bool:
 async def check_content_type(url: str) -> tuple[bool, str]:
     """Check if URL points to a downloadable file based on Content-Type header."""
     try:
-        async with aiohttp.ClientSession() as session:
+        # Create SSL context that doesn't verify certificates
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        # Headers to mimic a real browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        }
+        
+        connector = aiohttp.TCPConnector(ssl=ssl_context)
+        async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
             async with session.head(url, allow_redirects=True) as response:
                 content_type = response.headers.get('content-type', '').lower()
                 
@@ -54,6 +72,63 @@ async def check_content_type(url: str) -> tuple[bool, str]:
         print(f"Warning: Could not check content type for {url}: {e}")
         return False, ""
 
+async def download_file_locally(url: str, download_dir: str = "downloads") -> dict:
+    """Download file from URL and save locally."""
+    try:
+        # Create downloads directory if it doesn't exist
+        os.makedirs(download_dir, exist_ok=True)
+        
+        # Generate filename
+        parsed_url = urlparse(url)
+        filename = Path(parsed_url.path).name or "downloaded_file"
+        filepath = os.path.join(download_dir, filename)
+        
+        # Download file
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        # Headers to mimic a real browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        }
+        
+        connector = aiohttp.TCPConnector(ssl=ssl_context)
+        async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
+            async with session.get(url) as response:
+                if response.status not in [200, 202]:
+                    raise RuntimeError(f"Failed to download file: HTTP {response.status}")
+                
+                file_content = await response.read()
+                content_type = response.headers.get('content-type', 'application/octet-stream')
+        
+        # Save file locally
+        with open(filepath, 'wb') as f:
+            f.write(file_content)
+        
+        return {
+            'success': True,
+            'file_type': 'download',
+            'original_url': url,
+            'local_path': filepath,
+            'file_size': len(file_content),
+            'content_type': content_type
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'file_type': 'download',
+            'original_url': url,
+            'error': str(e)
+        }
+
 async def download_file_to_s3(url: str, s3_key: str = None) -> dict:
     """Download file from URL and upload to S3."""
     try:
@@ -64,9 +139,25 @@ async def download_file_to_s3(url: str, s3_key: str = None) -> dict:
             s3_key = f"downloads/{filename}"
         
         # Download file
-        async with aiohttp.ClientSession() as session:
+        import ssl
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        # Headers to mimic a real browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        }
+        
+        connector = aiohttp.TCPConnector(ssl=ssl_context)
+        async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
             async with session.get(url) as response:
-                if response.status != 200:
+                if response.status not in [200, 202]:
                     raise RuntimeError(f"Failed to download file: HTTP {response.status}")
                 
                 file_content = await response.read()
@@ -101,10 +192,20 @@ async def download_file_to_s3(url: str, s3_key: str = None) -> dict:
             'error': str(e)
         }
 
-async def process_file_download(url: str) -> dict:
+async def process_file_download(url: str, use_s3: bool = None) -> dict:
     """Main function to process a downloadable file URL."""
     print(f"📁 Downloading file: {url}")
-    return await download_file_to_s3(url)
+    
+    # Auto-detect S3 usage based on environment variables
+    if use_s3 is None:
+        use_s3 = bool(os.getenv('AWS_ACCESS_KEY_ID') and os.getenv('AWS_SECRET_ACCESS_KEY'))
+    
+    if use_s3:
+        print("  → Uploading to S3")
+        return await download_file_to_s3(url)
+    else:
+        print("  → Saving locally")
+        return await download_file_locally(url)
 
 # Example usage
 if __name__ == "__main__":
