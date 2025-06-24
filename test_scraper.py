@@ -6,7 +6,7 @@ def test_scrapper():
     """Test the scrapper and show file contents"""
     
     # Test URL
-    url = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+    url = "https://artsandculture.google.com/asset/FgEEOnrrqsn9OA"
     
     print(f"🔍 Testing scrapper with: {url}")
     

@@ -8,12 +8,7 @@ Agent_flow_link_scrapper.py - Simple Integration Wrapper
 """
 
 import asyncio
-import os
 from typing import Dict, Optional, Tuple
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 from crawl.orchestrator import process_single_url, save_result_to_file
 
