@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from agent_flow_link_scrapper import AgentFlowLinkScrapper
+from agent_flow_link_scraper import AgentFlowLinkScrapper
 
 def test_scrapper():
     """Test the scrapper and show file contents"""
