@@ -1,68 +1,15 @@
 """
 File Downloader Module - Simplified
-Handles automatic detection and downloading of files from URLs.
+Handles downloading of files from URLs.
 """
 
 import asyncio
-import aiohttp
 import boto3
 import os
-import ssl
 from urllib.parse import urlparse
 from pathlib import Path
-from typing import Tuple, Dict, Optional
-
-
-# File extensions for downloadable files
-DOWNLOADABLE_EXTENSIONS = {
-    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2',
-    '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff',
-    '.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm',
-    '.mp3', '.wav', '.flac', '.aac', '.ogg',
-    '.txt', '.csv', '.json', '.xml', '.sql'
-}
-
-# Content types for downloadable files
-DOWNLOADABLE_CONTENT_TYPES = [
-    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument',
-    'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/zip',
-    'application/octet-stream', 'image/', 'video/', 'audio/', 'application/json',
-    'text/csv', 'application/xml'
-]
-
-BROWSER_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-}
-
-
-def _create_http_session():
-    """Create HTTP session with SSL bypass."""
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-    connector = aiohttp.TCPConnector(ssl=ssl_context)
-    return aiohttp.ClientSession(connector=connector, headers=BROWSER_HEADERS)
-
-
-def is_downloadable_file(url: str) -> bool:
-    """Check if URL points to a downloadable file based on extension."""
-    parsed_url = urlparse(url)
-    file_path = parsed_url.path.lower()
-    return any(file_path.endswith(ext) for ext in DOWNLOADABLE_EXTENSIONS)
-
-
-async def check_content_type(url: str) -> Tuple[bool, str]:
-    """Check if URL is downloadable based on HTTP Content-Type header."""
-    try:
-        async with _create_http_session() as session:
-            async with session.head(url, allow_redirects=True) as response:
-                content_type = response.headers.get('content-type', '').lower()
-                is_downloadable = any(dt in content_type for dt in DOWNLOADABLE_CONTENT_TYPES)
-                return is_downloadable, content_type
-    except Exception as error:
-        print(f"Warning: Could not check content type for {url}: {error}")
-        return False, ""
+from typing import Dict, Optional
+from crawl.detection import _create_http_session
 
 
 async def process_file_download(url: str, use_s3: Optional[bool] = None) -> Dict:
@@ -137,6 +84,3 @@ async def process_file_download(url: str, use_s3: Optional[bool] = None) -> Dict
             'original_url': url,
             'error': str(error)
         }
-
-
-

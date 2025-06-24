@@ -2,4 +2,6 @@ crawl4ai
 playwright
 psutil
 boto3
-aiohttp 
+aiohttp
+beautifulsoup4
+ 
